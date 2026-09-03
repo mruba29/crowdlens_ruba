@@ -1,0 +1,16 @@
+# CROWDLENS ML service — person detection + ephemeral tracking + crowd features.
+# Runs as its own FastAPI process on :8001, independent of the backend.
+# Versions aligned with the backend venv (Python 3.13/3.14 compatible wheels).
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+numpy==2.5.2
+opencv-python-headless==4.10.0.84
+pydantic==2.13.5
+python-multipart==0.0.32
+
+# --- Heavy, optional. Install to enable real YOLO inference: ---
+#   pip install ultralytics
+# Without it, the service falls back to OpenCV HOG+SVM (marked "degraded"),
+# and if that is also unavailable it reports "offline" so the backend/frontend
+# show "ML Service Offline" instead of faking inference.
+# ultralytics

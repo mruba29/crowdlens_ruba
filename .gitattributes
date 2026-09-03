@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.avi binary
+*.docx binary
+*.svg text

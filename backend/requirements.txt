@@ -1,0 +1,23 @@
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+python-multipart==0.0.32
+websockets==17.1
+numpy==2.5.2
+opencv-python-headless==4.10.0.84
+
+# --- Person detection ---
+# YOLO is used automatically when installed; otherwise the backend falls back
+# to OpenCV HOG+SVM. To enable YOLO:
+#     pip install ultralytics
+# (pulls in torch / torchvision — a few hundred MB)
+ultralytics==8.4.138
+
+# --- tests / legacy rich API (backend/app) ---
+sqlalchemy==2.0.52
+pydantic==2.13.5
+httpx==0.28.1
+aiofiles==25.1.0
+pytest==9.1.1
+
+# NOTE: do NOT install `opencv-python` (non-headless) — it conflicts with
+# opencv-python-headless and its v5 wheel removes cv2.HOGDescriptor.

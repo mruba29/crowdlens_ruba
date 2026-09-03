@@ -1,0 +1,11 @@
+{
+  "name": "crowdlens",
+  "private": true,
+  "description": "Convenience scripts so commands work from the repo root. The real frontend app is in ./frontend",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "install:frontend": "npm --prefix frontend install",
+    "dev:backend": "cd backend && venv/Scripts/uvicorn app.main:app --host 0.0.0.0 --port 8000"
+  }
+}

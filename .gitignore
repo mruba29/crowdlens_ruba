@@ -1,0 +1,18 @@
+# python
+backend/venv/
+ml_service/venv/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+# databases / uploads / models
+backend/*.db
+backend/*.sqlite3
+backend/uploads/
+*.pt
+yolov8*.pt
+# node / build
+frontend/node_modules/
+frontend/dist/
+# os
+.DS_Store
+Thumbs.db

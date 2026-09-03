@@ -5,9 +5,9 @@ import {
 import { useApp } from '../store'
 import { Panel, EmptyState, PrivacyBadge } from '../components/ui'
 
-const axis = { fontSize: 11, fill: '#8b93a7' }
-const grid = '#262c3a'
-const tip = { background: '#131722', border: '1px solid #262c3a', fontSize: 12, borderRadius: 8 }
+const axis = { fontSize: 11, fill: '#8a938d' }
+const grid = '#2b3230'
+const tip = { background: '#191d1c', border: '1px solid #2b3230', fontSize: 12, borderRadius: 8 }
 
 export default function CrowdAnalytics() {
   const { history } = useApp()
@@ -38,7 +38,7 @@ export default function CrowdAnalytics() {
             <CartesianGrid stroke={grid} strokeDasharray="3 3" />
             <XAxis dataKey="t" tick={axis} /><YAxis tick={axis} allowDecimals={false} />
             <Tooltip contentStyle={tip} />
-            <Line type="monotone" dataKey="people" stroke="#3b82f6" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="people" stroke="#34d399" strokeWidth={2} dot={false} />
           </LineChart>
         </Chart>
 

@@ -50,7 +50,7 @@ export function RiskGauge({ score, level, label, size = 200 }: {
   return (
     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} stroke="#262c3a" strokeWidth={12} fill="none" />
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="#2b3230" strokeWidth={12} fill="none" />
         <circle cx={size / 2} cy={size / 2} r={r} stroke={hex} strokeWidth={12} fill="none"
           strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={circ * (1 - pct)}
           style={{ transition: 'stroke-dashoffset .5s ease, stroke .3s ease' }} />

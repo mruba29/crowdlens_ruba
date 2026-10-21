@@ -2,7 +2,7 @@ import type {
   AnalysisStatus, Metrics, Alert, Health, Settings, RiskLevel, VideoRecord,
   CrowdEvent, EventDetail, EventZone, EventCamera, EventVideoSource, TimelineEntry, SourceType,
   ZoneMetrics, ValidationSample, ValidationSummary, DynamicsSignals, DynamicsEvent, SRIResult,
-  Incident, PredictiveForecast,
+  Incident, PredictiveForecast, SampleVideo,
 } from './types'
 
 // Local dev uses the Vite proxy at /api and /ml. In a hosted build set
@@ -58,6 +58,14 @@ export const api = {
   videoCategories: () => req<string[]>('/videos/categories'),
   /** Direct URL to stream/play back an uploaded file (served by the backend's /uploads mount). */
   videoUrl: (id: string) => `${API_BASE.replace(/\/api$/, '')}/uploads/${id}`,
+
+  // ---- sample video library (7 event categories + research datasets) ----
+  listSamples: () => req<SampleVideo[]>('/samples'),
+  importSample: (sample_id: string) =>
+    req<{ ok: boolean; video: VideoRecord; message?: string }>('/samples/import', {
+      method: 'POST',
+      body: JSON.stringify({ sample_id }),
+    }),
 
   startAnalysis: (video_id: string) =>
     req<AnalysisStatus>('/analysis/start', { method: 'POST', body: JSON.stringify({ video_id }) }),

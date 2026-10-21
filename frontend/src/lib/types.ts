@@ -166,8 +166,35 @@ export interface VideoRecord {
 }
 
 export const VIDEO_CATEGORIES = [
-  'Temple/Festival', 'Stadium', 'Concert', 'Public Gathering', 'Transport Hub', 'Procession', 'Protest', 'Other',
+  'Temple / Festival',
+  'Stadium / Sports',
+  'Concert / Music Festival',
+  'Public Gathering',
+  'Transport Hub / Railway / Metro',
+  'Procession',
+  'Protest / Rally',
+  'Other',
 ] as const
+
+export interface SampleVideo {
+  id: string
+  title: string
+  category: string
+  source_name: string
+  source_url: string
+  direct_download_url?: string | null
+  local_filename?: string | null
+  duration_sec?: number | null
+  resolution?: string | null
+  license: string
+  is_synthetic: boolean
+  scenario_type: string
+  expected_indicators: string
+  description: string
+  is_imported: boolean
+  video_id?: string | null
+  status?: string | null
+}
 
 export interface Incident {
   id: number

@@ -103,3 +103,45 @@ def test_analysis_state_queue_and_pause():
     assert state.is_paused is False
     assert not state._pause.is_set()
 
+
+def test_sample_videos_catalogue():
+    import main
+    samples = main.SAMPLE_VIDEOS
+    assert len(samples) >= 7
+    categories = {s["category"] for s in samples}
+    expected = {
+        "Temple / Festival",
+        "Stadium / Sports",
+        "Concert / Music Festival",
+        "Public Gathering",
+        "Transport Hub / Railway / Metro",
+        "Procession",
+        "Protest / Rally",
+    }
+    for exp in expected:
+        assert exp in categories, f"Missing category in sample catalogue: {exp}"
+
+    # Verify each sample has required fields and licensing
+    for s in samples:
+        assert s["id"]
+        assert s["title"]
+        assert s["source_name"]
+        assert s["source_url"].startswith("http")
+        assert s["license"]
+        assert isinstance(s["is_synthetic"], bool)
+        assert s["scenario_type"]
+        assert s["description"]
+
+
+def test_category_normalization():
+    import main
+    assert main._norm_category("temple") == "Temple / Festival"
+    assert main._norm_category("Stadium") == "Stadium / Sports"
+    assert main._norm_category("Concert") == "Concert / Music Festival"
+    assert main._norm_category("Metro Hub") == "Transport Hub / Railway / Metro"
+    assert main._norm_category("Parade / Procession") == "Procession"
+    assert main._norm_category("Rally") == "Protest / Rally"
+    assert main._norm_category("Public Gathering") == "Public Gathering"
+    assert main._norm_category(None) == "Other"
+
+

@@ -45,7 +45,211 @@ app.add_middleware(
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 app.mount("/api/uploads", StaticFiles(directory=UPLOAD_DIR), name="api_uploads")
 
-VIDEO_CATEGORIES = ("Temple/Festival", "Stadium", "Concert", "Public Gathering", "Transport Hub", "Procession", "Protest", "Other")
+VIDEO_CATEGORIES = (
+    "Temple / Festival",
+    "Stadium / Sports",
+    "Concert / Music Festival",
+    "Public Gathering",
+    "Transport Hub / Railway / Metro",
+    "Procession",
+    "Protest / Rally",
+    "Other",
+)
+
+def _norm_category(cat: str | None) -> str:
+    if not cat:
+        return "Other"
+    c = cat.strip()
+    c_lower = c.lower()
+    if "temple" in c_lower or "fest" in c_lower:
+        return "Temple / Festival"
+    if "stadium" in c_lower or "sport" in c_lower:
+        return "Stadium / Sports"
+    if "concert" in c_lower or "music" in c_lower:
+        return "Concert / Music Festival"
+    if "metro" in c_lower or "rail" in c_lower or "transport" in c_lower or "station" in c_lower:
+        return "Transport Hub / Railway / Metro"
+    if "procession" in c_lower or "parade" in c_lower or "yatra" in c_lower:
+        return "Procession"
+    if "protest" in c_lower or "rally" in c_lower or "demonstration" in c_lower:
+        return "Protest / Rally"
+    if "public" in c_lower or "gathering" in c_lower or "plaza" in c_lower:
+        return "Public Gathering"
+    for vc in VIDEO_CATEGORIES:
+        if vc.lower() == c_lower:
+            return vc
+    return "Other"
+
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
+
+SAMPLE_VIDEOS = [
+    {
+        "id": "sample-temple-thaipusam",
+        "title": "Thaipusam Festival Chariot Procession",
+        "category": "Temple / Festival",
+        "source_name": "Wikimedia Commons",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Thaipusam_Festival_Singapore.webm",
+        "direct_download_url": "https://upload.wikimedia.org/wikipedia/commons/3/30/Thaipusam_Festival_Singapore.webm",
+        "local_filename": "Thaipusam_Festival_Singapore.webm",
+        "duration_sec": 142.0,
+        "resolution": "1280x720",
+        "license": "CC BY-SA 3.0",
+        "is_synthetic": False,
+        "scenario_type": "High Density",
+        "expected_indicators": "Dense religious gathering, constrained forward street column, lateral crowd compression.",
+        "description": "Real footage from the annual Thaipusam chariot festival procession. Features dense pilgrim movement, ceremonial chariots, and narrow street chokepoints.",
+    },
+    {
+        "id": "sample-stadium-surge",
+        "title": "Stadium Grandstand Crowd Wave & Cheer",
+        "category": "Stadium / Sports",
+        "source_name": "Wikimedia Commons",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Krazy_George_leads_the_crowd_in_a_cheer_01.webm",
+        "direct_download_url": "https://upload.wikimedia.org/wikipedia/commons/6/6e/Krazy_George_leads_the_crowd_in_a_cheer_01.webm",
+        "local_filename": "Krazy_George_leads_the_crowd_in_a_cheer_01.webm",
+        "duration_sec": 45.0,
+        "resolution": "1920x1080",
+        "license": "CC BY 3.0",
+        "is_synthetic": False,
+        "scenario_type": "Turbulent Motion",
+        "expected_indicators": "Rapid synchronized wave motion, high velocity variance, sudden tier-to-tier acceleration.",
+        "description": "Seated sports stadium crowd performing an interactive Mexican wave and standing surge. Tests motion entropy, turbulence detection, and tiered seating dynamics.",
+    },
+    {
+        "id": "sample-concert-cincy",
+        "title": "Open-Air Music Concert & Plaza Surge",
+        "category": "Concert / Music Festival",
+        "source_name": "Wikimedia Commons",
+        "source_url": "https://commons.wikimedia.org/wiki/File:MLS2Cincy_announcement_-_crowd_panning_shot.webm",
+        "direct_download_url": "https://upload.wikimedia.org/wikipedia/commons/8/87/MLS2Cincy_announcement_-_crowd_panning_shot.webm",
+        "local_filename": "MLS2Cincy_announcement_-_crowd_panning_shot.webm",
+        "duration_sec": 38.0,
+        "resolution": "1920x1080",
+        "license": "CC BY 3.0",
+        "is_synthetic": False,
+        "scenario_type": "Bottleneck / Accumulation",
+        "expected_indicators": "Perimeter boundary pressure, stage-facing accumulation, localized cluster density.",
+        "description": "Panned aerial and ground view of open-air music festival crowd accumulating near front barrier. Evaluates edge pressure proxy, cluster density, and spatial concentration.",
+    },
+    {
+        "id": "sample-public-vtest",
+        "title": "Urban Pedestrian Plaza Crossing Benchmark",
+        "category": "Public Gathering",
+        "source_name": "OpenCV Pedestrian Benchmark / UCF CRCV",
+        "source_url": "https://github.com/opencv/opencv/blob/master/samples/data/vtest.avi",
+        "direct_download_url": "https://raw.githubusercontent.com/opencv/opencv/master/samples/data/vtest.avi",
+        "local_filename": "vtest.avi",
+        "duration_sec": 26.5,
+        "resolution": "768x576",
+        "license": "BSD 3-Clause",
+        "is_synthetic": False,
+        "scenario_type": "Normal Crowd",
+        "expected_indicators": "Safe low density (<1.5 p/m²), continuous laminar flow, low turbulence.",
+        "description": "Standard computer vision pedestrian benchmark. Pedestrians crossing a bright paved courtyard in daylight. Serves as ground truth for normal safe baseline conditions.",
+    },
+    {
+        "id": "sample-transport-ppsd",
+        "title": "Metro Concourse & Platform Transit Influx",
+        "category": "Transport Hub / Railway / Metro",
+        "source_name": "Zenodo PPS-D Public Safety Research",
+        "source_url": "https://zenodo.org/records/15124010",
+        "direct_download_url": None,
+        "local_filename": None,
+        "duration_sec": 30.0,
+        "resolution": "1920x1080",
+        "license": "CC BY 4.0",
+        "is_synthetic": True,
+        "scenario_type": "Bottleneck / Accumulation",
+        "expected_indicators": "Gate accumulation, platform edge proximity, cyclic arrival/departure waves.",
+        "description": "From Zenodo PPS-D (Person-oriented Protection of Public Spaces Dataset). Synthetic benchmark modeling railway station concourse, passenger boarding, and platform edge queues.",
+    },
+    {
+        "id": "sample-procession-lerwick",
+        "title": "Festival Street Parade & Linear March Column",
+        "category": "Procession",
+        "source_name": "Wikimedia Commons",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Lerwick_Up_Helly_Aa_Morning_Procession_2020.webm",
+        "direct_download_url": "https://upload.wikimedia.org/wikipedia/commons/4/48/Lerwick_Up_Helly_Aa_Morning_Procession_2020.webm",
+        "local_filename": "Lerwick_Up_Helly_Aa_Morning_Procession_2020.webm",
+        "duration_sec": 63.0,
+        "resolution": "1920x1080",
+        "license": "CC BY-SA 4.0",
+        "is_synthetic": False,
+        "scenario_type": "Possible Compression",
+        "expected_indicators": "High pack density, narrow lateral corridors, persistent forward momentum.",
+        "description": "Annual morning parade through historic narrow streets. Features tightly packed linear columns flanked by spectator barriers, ideal for corridor compression assessment.",
+    },
+    {
+        "id": "sample-protest-demonstration",
+        "title": "Civic Street Demonstration & Protest March",
+        "category": "Protest / Rally",
+        "source_name": "Wikimedia Commons / UCF Demonstration Archive",
+        "source_url": "https://commons.wikimedia.org/wiki/Category:Videos_of_demonstrations_and_protests",
+        "direct_download_url": None,
+        "local_filename": None,
+        "duration_sec": 50.0,
+        "resolution": "1280x720",
+        "license": "CC BY-SA 4.0",
+        "is_synthetic": False,
+        "scenario_type": "Reverse Flow",
+        "expected_indicators": "Conflicting flow vectors, stopping front waves, intersection congestion.",
+        "description": "Civic demonstration march along metropolitan avenue. Highlights banner-led lead waves, counter-flowing pedestrian streams at road intersections, and crowd halts.",
+    },
+    {
+        "id": "sample-walkindia-street",
+        "title": "WalkIndia Urban Market Pedestrian Density",
+        "category": "Public Gathering",
+        "source_name": "HuggingFace WalkIndia-50 Dataset",
+        "source_url": "https://huggingface.co/datasets/anonymousML123/walkindia-50-clips",
+        "direct_download_url": None,
+        "local_filename": None,
+        "duration_sec": 35.0,
+        "resolution": "1920x1080",
+        "license": "Open Academic Research",
+        "is_synthetic": False,
+        "scenario_type": "High Density",
+        "expected_indicators": "Irregular walking speeds, multi-agent obstacle avoidance, fluctuating local density.",
+        "description": "From the WalkIndia-50 crowd research collection. Real walking tour footage through bustling non-Western urban markets, retail corridors, and pedestrian thoroughfares.",
+    },
+]
+
+def _seed_samples() -> None:
+    """Best-effort initial seed: register any local bundled sample files that are already
+    on disk so the video library is ready out of the box."""
+    try:
+        existing = {v["filename"] for v in store.list_videos()}
+        # 1. Check data/vtest.avi
+        vtest_src = os.path.join(DATA_DIR, "vtest.avi")
+        if os.path.exists(vtest_src) and "vtest.avi" not in existing:
+            vtest_dest = os.path.join(UPLOAD_DIR, "vtest.avi")
+            if not os.path.exists(vtest_dest):
+                shutil.copy2(vtest_src, vtest_dest)
+            duration, thumb, res = _probe_video(vtest_dest)
+            store.add_video("vtest.avi", "vtest.avi", "Public Gathering", os.path.getsize(vtest_dest), duration, thumb)
+
+        # 2. Check any existing uploads that correspond to our sample videos
+        for sample in SAMPLE_VIDEOS:
+            fname = sample.get("local_filename")
+            if not fname:
+                continue
+            # Search if file exists in UPLOAD_DIR
+            target_path = os.path.join(UPLOAD_DIR, fname)
+            matched_vid = None
+            if os.path.exists(target_path):
+                matched_vid = fname
+            else:
+                # Search by exact filename match in upload dir files
+                for f in os.listdir(UPLOAD_DIR):
+                    if f == fname or f.endswith(f"_{fname}"):
+                        matched_vid = f
+                        break
+            if matched_vid and fname not in existing:
+                p = os.path.join(UPLOAD_DIR, matched_vid)
+                dur, thumb, res = _probe_video(p)
+                store.add_video(matched_vid, fname, sample["category"], os.path.getsize(p), dur, thumb)
+    except Exception:
+        pass
+
 
 # ---- runtime settings (in-memory, editable via /api/settings) ----
 SETTINGS: dict = {
@@ -84,6 +288,7 @@ async def _startup():
     global _loop
     _loop = asyncio.get_running_loop()
     store.init()
+    _seed_samples()
 
 
 # ---------------------------------------------------------------- health
@@ -105,20 +310,129 @@ def health():
     }
 
 
+# ---------------------------------------------------------------- sample videos library
+@app.get("/api/samples")
+def list_samples():
+    """List curated crowd-safety test videos across all 7 official categories,
+    enriched with import status against the active library."""
+    all_videos = store.list_videos()
+    video_by_name = {v["filename"].lower(): v for v in all_videos}
+    video_by_id = {v["id"].lower(): v for v in all_videos}
+
+    enriched = []
+    for s in SAMPLE_VIDEOS:
+        item = dict(s)
+        matched = None
+        if s.get("local_filename"):
+            fname = s["local_filename"].lower()
+            matched = video_by_name.get(fname) or video_by_id.get(fname)
+        if not matched:
+            # check title or sample id
+            for v in all_videos:
+                if s["id"] in v["id"] or s["title"].lower() in v["filename"].lower():
+                    matched = v
+                    break
+
+        item["is_imported"] = matched is not None
+        item["video_id"] = matched["id"] if matched else None
+        item["status"] = matched["status"] if matched else None
+        enriched.append(item)
+    return enriched
+
+
+@app.post("/api/samples/import")
+async def import_sample(payload: dict):
+    sample_id = payload.get("sample_id")
+    if not sample_id:
+        raise HTTPException(400, "sample_id is required")
+
+    sample = next((s for s in SAMPLE_VIDEOS if s["id"] == sample_id), None)
+    if not sample:
+        raise HTTPException(404, f"sample {sample_id} not found")
+
+    # 1. Check if already imported
+    all_videos = store.list_videos()
+    fname = sample.get("local_filename")
+    for v in all_videos:
+        if (fname and v["filename"] == fname) or (s_id := sample["id"]) in v["id"]:
+            return {"ok": True, "video": v, "message": "Video is already in your library."}
+
+    # 2. Check local bundled file
+    if fname:
+        # Check UPLOAD_DIR
+        cand1 = os.path.join(UPLOAD_DIR, fname)
+        cand2 = os.path.join(DATA_DIR, fname)
+        found_path = cand1 if os.path.exists(cand1) else (cand2 if os.path.exists(cand2) else None)
+        if not found_path:
+            # Search partial match in UPLOAD_DIR
+            for f in os.listdir(UPLOAD_DIR):
+                if f.endswith(f"_{fname}") or f == fname:
+                    found_path = os.path.join(UPLOAD_DIR, f)
+                    break
+
+        if found_path:
+            target_vid = fname
+            target_dest = os.path.join(UPLOAD_DIR, target_vid)
+            if found_path != target_dest and not os.path.exists(target_dest):
+                shutil.copy2(found_path, target_dest)
+            size = os.path.getsize(target_dest)
+            duration, thumb, res = _probe_video(target_dest)
+            rec = store.add_video(target_vid, fname, sample["category"], size, duration, thumb)
+            return {"ok": True, "video": rec, "message": "Imported sample from bundled assets."}
+
+    # 3. Direct download if supported
+    direct_url = sample.get("direct_download_url")
+    if direct_url and direct_url.startswith("http"):
+        import httpx
+        ext = os.path.splitext(direct_url)[1].lower() or ".mp4"
+        new_vid = f"sample_{sample_id}_{uuid.uuid4().hex[:8]}{ext}"
+        dest_path = os.path.join(UPLOAD_DIR, new_vid)
+        try:
+            async with httpx.AsyncClient(timeout=45.0, follow_redirects=True) as client:
+                async with client.stream("GET", direct_url) as resp:
+                    if resp.status_code != 200:
+                        raise HTTPException(400, f"failed to download sample: status {resp.status_code}")
+                    total = 0
+                    with open(dest_path, "wb") as out:
+                        async for chunk in resp.aiter_bytes(chunk_size=65536):
+                            total += len(chunk)
+                            if total > 150 * 1024 * 1024:
+                                os.remove(dest_path)
+                                raise HTTPException(400, "sample video exceeds 150MB limit")
+                            out.write(chunk)
+            size = os.path.getsize(dest_path)
+            duration, thumb, res = _probe_video(dest_path)
+            rec = store.add_video(new_vid, sample["title"] + ext, sample["category"], size, duration, thumb)
+            return {"ok": True, "video": rec, "message": "Sample downloaded and imported successfully."}
+        except HTTPException:
+            raise
+        except Exception as e:
+            if os.path.exists(dest_path):
+                os.remove(dest_path)
+            raise HTTPException(500, f"download failed: {str(e)}")
+
+    raise HTTPException(
+        400,
+        f"Sample '{sample['title']}' requires manual download due to source licensing ({sample['source_name']}). "
+        f"Please click 'Open Source Page', download the file, and upload it using 'Upload Videos'."
+    )
+
+
 # ---------------------------------------------------------------- video upload
 @app.post("/api/video/upload")
 async def upload_video(file: UploadFile = File(...), category: str = Form("Other")):
     ext = os.path.splitext(file.filename or "video.mp4")[1].lower()
     if ext not in (".mp4", ".avi", ".mov", ".mkv", ".webm"):
-        raise HTTPException(400, f"unsupported file type: {ext}")
+        raise HTTPException(400, f"unsupported file type: {ext}. Supported: MP4, MOV, WebM, AVI, MKV")
     video_id = uuid.uuid4().hex + ext
     dest = os.path.join(UPLOAD_DIR, video_id)
     with open(dest, "wb") as f:
         shutil.copyfileobj(file.file, f)
     size = os.path.getsize(dest)
 
-    duration_sec, thumbnail = _probe_video(dest)
-    rec = store.add_video(video_id, file.filename or video_id, category, size, duration_sec, thumbnail)
+    duration_sec, thumbnail, resolution = _probe_video(dest)
+    norm_cat = _norm_category(category)
+    rec = store.add_video(video_id, file.filename or video_id, norm_cat, size, duration_sec, thumbnail)
     # keep "video_id" for the pre-existing Live Analysis page; new pages use "id"
     return {**rec, "video_id": video_id}
 
@@ -127,6 +441,7 @@ async def upload_video(file: UploadFile = File(...), category: str = Form("Other
 async def batch_upload_videos(files: list[UploadFile] = File(...), category: str = Form("Other")):
     results = []
     errors = []
+    norm_cat = _norm_category(category)
     for file in files:
         ext = os.path.splitext(file.filename or "video.mp4")[1].lower()
         if ext not in (".mp4", ".avi", ".mov", ".mkv", ".webm"):
@@ -138,37 +453,40 @@ async def batch_upload_videos(files: list[UploadFile] = File(...), category: str
             with open(dest, "wb") as f:
                 shutil.copyfileobj(file.file, f)
             size = os.path.getsize(dest)
-            duration_sec, thumbnail = _probe_video(dest)
-            rec = store.add_video(video_id, file.filename or video_id, category, size, duration_sec, thumbnail)
+            duration_sec, thumbnail, resolution = _probe_video(dest)
+            rec = store.add_video(video_id, file.filename or video_id, norm_cat, size, duration_sec, thumbnail)
             results.append({**rec, "video_id": video_id})
         except Exception as e:
             errors.append(f"{file.filename}: {str(e)}")
     return {"uploaded": results, "errors": errors, "count": len(results)}
 
 
-def _probe_video(path: str) -> tuple[float | None, str | None]:
-    """Best-effort: real duration + a real first-frame thumbnail (never fabricated)."""
+def _probe_video(path: str) -> tuple[float | None, str | None, str | None]:
+    """Best-effort: real duration + resolution + a real first-frame thumbnail (never fabricated)."""
     cap = cv2.VideoCapture(path)
     try:
         if not cap.isOpened():
-            return None, None
+            return None, None, None
         fps = cap.get(cv2.CAP_PROP_FPS) or 0.0
         frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0.0
         duration = round(frame_count / fps, 1) if fps > 0 and frame_count > 0 else None
+        w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) or 0)
+        h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) or 0)
+        resolution = f"{w}x{h}" if w > 0 and h > 0 else None
         ok, frame = cap.read()
         thumbnail = None
         if ok:
-            h, w = frame.shape[:2]
+            fh, fw = frame.shape[:2]
             tw = 480
-            if w > tw:
-                frame = cv2.resize(frame, (tw, max(1, int(h * tw / w))))
+            if fw > tw:
+                frame = cv2.resize(frame, (tw, max(1, int(fh * tw / fw))))
             ok2, buf = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 70])
             if ok2:
                 import base64
                 thumbnail = "data:image/jpeg;base64," + base64.b64encode(buf.tobytes()).decode("ascii")
-        return duration, thumbnail
+        return duration, thumbnail, resolution
     except Exception:  # noqa: BLE001
-        return None, None
+        return None, None, None
     finally:
         cap.release()
 

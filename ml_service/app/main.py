@@ -29,6 +29,7 @@ _START = time.time()
 
 
 @app.get("/health")
+@app.get("/ml/health")
 def health():
     det = get_detector()
     status = "operational" if det.available and not det.degraded else (
@@ -58,6 +59,7 @@ def _sse(gen):
 
 
 @app.post("/analyze")
+@app.post("/ml/analyze")
 async def analyze(file: UploadFile = File(...), sample_every_n: int = 3,
                   max_frames: int = 600, zone_area_m2: float = 120.0):
     suffix = os.path.splitext(file.filename or "video.mp4")[1] or ".mp4"
@@ -73,6 +75,7 @@ async def analyze(file: UploadFile = File(...), sample_every_n: int = 3,
 
 
 @app.post("/analyze/path")
+@app.post("/ml/analyze/path")
 def analyze_path(payload: dict = Body(...)):
     path = payload.get("path")
     sample_every_n = int(payload.get("sample_every_n", 3))

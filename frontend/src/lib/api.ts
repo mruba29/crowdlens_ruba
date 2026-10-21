@@ -5,9 +5,11 @@ import type {
   Incident, PredictiveForecast,
 } from './types'
 
-// Local dev uses the Vite proxy at /api. In a hosted build (e.g. Vercel) set
-// VITE_API_BASE to the backend URL, e.g. https://crowdlens-api.onrender.com/api
+// Local dev uses the Vite proxy at /api and /ml. In a hosted build set
+// VITE_API_BASE (e.g. /api or https://backend.domain/api) and
+// VITE_ML_API_BASE (e.g. /ml or https://ml.domain/ml)
 export const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/$/, '') || '/api'
+export const ML_API_BASE = (import.meta.env.VITE_ML_API_BASE as string | undefined)?.replace(/\/$/, '') || '/ml'
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -23,6 +25,11 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   health: () => req<Health>('/health'),
+  mlHealth: async () => {
+    const res = await fetch(`${ML_API_BASE}/health`)
+    if (!res.ok) throw new Error(`ML health check failed: ${res.status}`)
+    return res.json()
+  },
 
   uploadVideo: async (file: File, category?: string) => {
     const form = new FormData()

@@ -14,8 +14,16 @@ import threading
 import time
 import uuid
 
-_DB_PATH = os.environ.get("CROWDLENS_DB",
-                          os.path.join(os.path.dirname(os.path.abspath(__file__)), "crowdlens.sqlite3"))
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+_DB_PATH = os.environ.get(
+    "CROWDLENS_DB",
+    "/tmp/crowdlens.sqlite3" if os.environ.get("VERCEL") else os.path.join(os.path.dirname(os.path.abspath(__file__)), "crowdlens.sqlite3")
+)
 _lock = threading.Lock()
 
 

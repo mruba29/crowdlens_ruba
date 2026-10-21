@@ -25,7 +25,10 @@ import store
 import analysis
 from cv.detector import get_detector
 
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
+UPLOAD_DIR = os.environ.get(
+    "CROWDLENS_UPLOADS",
+    "/tmp/crowdlens_uploads" if os.environ.get("VERCEL") else os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
+)
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app = FastAPI(title="CROWDLENS", version="1.0.0")
@@ -40,6 +43,7 @@ app.add_middleware(
 # Serve uploaded videos directly so the frontend video player (Crowd Videos /
 # video detail page) can play them back — same files the CV pipeline reads.
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+app.mount("/api/uploads", StaticFiles(directory=UPLOAD_DIR), name="api_uploads")
 
 VIDEO_CATEGORIES = ("Temple/Festival", "Stadium", "Concert", "Public Gathering", "Transport Hub", "Procession", "Protest", "Other")
 
@@ -763,6 +767,7 @@ def update_settings(payload: dict):
 
 # ---------------------------------------------------------------- websocket
 @app.websocket("/ws")
+@app.websocket("/api/ws")
 async def ws(websocket: WebSocket):
     await websocket.accept()
     _clients.add(websocket)
@@ -774,3 +779,10 @@ async def ws(websocket: WebSocket):
         _clients.discard(websocket)
     except Exception:
         _clients.discard(websocket)
+
+if __name__ == '__main__':
+    import uvicorn
+    host = os.environ.get('BACKEND_HOST', '0.0.0.0')
+    port = int(os.environ.get('BACKEND_PORT', '8000'))
+    uvicorn.run('main:app', host=host, port=port, reload=True)
+

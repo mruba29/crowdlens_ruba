@@ -1,0 +1,4 @@
+# Heavy ML dependencies (PyTorch + Ultralytics YOLO).
+# Install on dedicated worker hosts (Render, Railway, AWS ECS, Cloud Run, EC2, or local):
+#   pip install -r requirements-ml.txt
+ultralytics==8.4.138

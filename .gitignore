@@ -5,6 +5,8 @@ ml_service/venv/
 *.pyc
 .pytest_cache/
 # databases / uploads / models
+*.db
+*.sqlite3
 backend/*.db
 backend/*.sqlite3
 backend/uploads/

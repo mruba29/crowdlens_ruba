@@ -1,0 +1,43 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "frontend": {
+      "root": "frontend/",
+      "framework": "vite"
+    },
+    "backend": {
+      "root": "backend/",
+      "entrypoint": "main:app"
+    },
+    "ml_service": {
+      "root": "ml_service/",
+      "entrypoint": "app.main:app"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api",
+      "destination": { "service": "backend" }
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": { "service": "backend" }
+    },
+    {
+      "source": "/uploads/(.*)",
+      "destination": { "service": "backend" }
+    },
+    {
+      "source": "/ml",
+      "destination": { "service": "ml_service" }
+    },
+    {
+      "source": "/ml/(.*)",
+      "destination": { "service": "ml_service" }
+    },
+    {
+      "source": "/(.*)",
+      "destination": { "service": "frontend" }
+    }
+  ]
+}

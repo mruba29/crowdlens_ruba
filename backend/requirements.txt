@@ -7,10 +7,11 @@ opencv-python-headless==4.10.0.84
 
 # --- Person detection ---
 # YOLO is used automatically when installed; otherwise the backend falls back
-# to OpenCV HOG+SVM. To enable YOLO:
-#     pip install ultralytics
-# (pulls in torch / torchvision — a few hundred MB)
-ultralytics==8.4.138
+# to OpenCV HOG+SVM.
+# Note: For Vercel Serverless Functions, ultralytics (PyTorch) exceeds the 250MB
+# limit. For dedicated worker / container deployments (Render/Railway/AWS/GCP), install:
+#     pip install -r requirements-ml.txt
+# ultralytics==8.4.138
 
 # --- tests / legacy rich API (backend/app) ---
 sqlalchemy==2.0.52

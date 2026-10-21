@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react'
 import { api } from './lib/api'
-import type { AnalysisStatus, FrameMetric, HistoryPoint, Zone, Alert, Health } from './lib/types'
+import type { AnalysisStatus, FrameMetric, HistoryPoint, Zone, Alert, Health, VideoRecord, Incident } from './lib/types'
 
 interface AppState {
   connected: boolean
@@ -10,7 +10,11 @@ interface AppState {
   history: HistoryPoint[]
   zones: Zone[]
   alerts: Alert[]
+  incidents: Incident[]
+  videos: VideoRecord[]
   refreshAlerts: () => Promise<void>
+  refreshIncidents: () => Promise<void>
+  refreshVideos: () => Promise<void>
   refreshAll: () => Promise<void>
 }
 
@@ -30,10 +34,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [history, setHistory] = useState<HistoryPoint[]>([])
   const [zones, setZones] = useState<Zone[]>([])
   const [alerts, setAlerts] = useState<Alert[]>([])
+  const [incidents, setIncidents] = useState<Incident[]>([])
+  const [videos, setVideos] = useState<VideoRecord[]>([])
   const wsRef = useRef<WebSocket | null>(null)
 
   const refreshAlerts = useCallback(async () => {
     try { setAlerts(await api.alerts()) } catch { /* offline */ }
+  }, [])
+
+  const refreshIncidents = useCallback(async () => {
+    try { setIncidents(await api.listIncidents()) } catch { /* offline */ }
+  }, [])
+
+  const refreshVideos = useCallback(async () => {
+    try { setVideos(await api.listVideos()) } catch { /* offline */ }
   }, [])
 
   const refreshAll = useCallback(async () => {
@@ -46,7 +60,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setZones(m.zones)
     } catch { /* offline */ }
     refreshAlerts()
-  }, [refreshAlerts])
+    refreshIncidents()
+    refreshVideos()
+  }, [refreshAlerts, refreshIncidents, refreshVideos])
 
   // health poll (cheap, always)
   useEffect(() => {
@@ -84,8 +100,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(id)
   }, [status?.status])
 
-  // initial alerts
-  useEffect(() => { refreshAlerts() }, [refreshAlerts])
+  // initial alerts and incidents
+  useEffect(() => {
+    refreshAlerts()
+    refreshIncidents()
+  }, [refreshAlerts, refreshIncidents])
+
+  // video library poll — cheap (sqlite reads), drives Dashboard's camera
+  // cards and the Crowd Videos page for every viewer, not just the one
+  // running an analysis.
+  useEffect(() => {
+    let alive = true
+    const tick = () => api.listVideos().then((v) => alive && setVideos(v)).catch(() => {})
+    tick()
+    const id = setInterval(tick, 4000)
+    return () => { alive = false; clearInterval(id) }
+  }, [])
 
   // websocket
   useEffect(() => {
@@ -93,8 +123,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     let retry: ReturnType<typeof setTimeout>
     const connect = () => {
       if (cancelled) return
+      // VITE_WS_URL for hosted builds, e.g. wss://crowdlens-api.onrender.com/ws
+      const envWs = import.meta.env.VITE_WS_URL as string | undefined
       const proto = location.protocol === 'https:' ? 'wss' : 'ws'
-      const ws = new WebSocket(`${proto}://${location.host}/ws`)
+      const url = envWs || `${proto}://${location.host}/ws`
+      const ws = new WebSocket(url)
       wsRef.current = ws
       ws.onopen = () => setConnected(true)
       ws.onclose = () => { setConnected(false); if (!cancelled) retry = setTimeout(connect, 2000) }
@@ -124,18 +157,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             if (msg.data.zones) setZones(msg.data.zones)
           } else if (msg.type === 'status' && msg.data) {
             setStatus(msg.data)
+            refreshVideos()
           } else if (msg.type === 'alert') {
             refreshAlerts()
+            refreshIncidents()
+          } else if (msg.type === 'incident') {
+            refreshIncidents()
           }
         } catch { /* ignore malformed */ }
       }
     }
     connect()
     return () => { cancelled = true; clearTimeout(retry); wsRef.current?.close() }
-  }, [refreshAlerts])
+  }, [refreshAlerts, refreshIncidents, refreshVideos])
 
   const value: AppState = {
-    connected, health, status, latest, history, zones, alerts, refreshAlerts, refreshAll,
+    connected, health, status, latest, history, zones, alerts, incidents, videos,
+    refreshAlerts, refreshIncidents, refreshVideos, refreshAll,
   }
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

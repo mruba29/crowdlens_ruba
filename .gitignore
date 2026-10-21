@@ -11,7 +11,9 @@ backend/uploads/
 *.pt
 yolov8*.pt
 # node / build
+node_modules/
 frontend/node_modules/
+dist/
 frontend/dist/
 # os
 .DS_Store

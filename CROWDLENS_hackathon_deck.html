@@ -1,0 +1,853 @@
+<!doctype html>
+<title>CROWDLENS Command Deck</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#0a0e16;
+    --surface:#10151f;
+    --surface-2:#171f2c;
+    --surface-3:#1d2635;
+    --border:#28334380;
+    --border-strong:#3a4a5e;
+    --text:#e8edf4;
+    --text-dim:#8b96ab;
+    --text-faint:#5c6579;
+    --accent:#31d6e0;
+    --accent-dim:#1c8a92;
+    --accent-soft:#31d6e022;
+    --good:#31d6e0;
+    --partial:#e0b04a;
+    --planned:#5c6579;
+    --green:#4ade80; --yellow:#facc15; --orange:#fb923c; --red:#f87171; --black:#c084fc;
+    --shadow: 0 0 0 1px var(--border);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'IBM Plex Sans',system-ui,sans-serif;
+    font-size:15px; line-height:1.5;
+  }
+  h1,h2,h3,.display{
+    font-family:'Rajdhani',system-ui,sans-serif; font-weight:700;
+    letter-spacing:0.01em; text-wrap:balance; margin:0;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  code, .code{font-family:'IBM Plex Mono',monospace; font-size:0.85em;}
+  a{color:var(--accent);}
+  ::selection{background:var(--accent-soft); color:var(--text);}
+
+  /* ---------- chrome ---------- */
+  .topbar{
+    position:fixed; top:0; left:0; right:0; height:44px; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 18px 0 64px; background:#0a0e16ee; backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--border); font-family:'IBM Plex Mono',monospace;
+    font-size:11px; letter-spacing:0.04em; color:var(--text-dim);
+  }
+  .topbar .brand{display:flex; align-items:center; gap:8px; color:var(--text); font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; letter-spacing:0.06em;}
+  .brand .mark{width:9px; height:9px; border-radius:2px; background:var(--accent); box-shadow:0 0 8px var(--accent);}
+  .topbar .status{display:flex; align-items:center; gap:16px;}
+  .topbar .status span{display:flex; align-items:center; gap:6px;}
+  .dot{width:6px; height:6px; border-radius:50%; background:var(--good); box-shadow:0 0 6px var(--good);}
+  .dot.warn{background:var(--partial); box-shadow:0 0 6px var(--partial);}
+
+  .rail{
+    position:fixed; left:0; top:44px; bottom:0; width:52px; z-index:50;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+    border-right:1px solid var(--border); background:#0a0e16cc;
+  }
+  .rail button{
+    width:26px; height:26px; border-radius:50%; border:1px solid var(--border-strong);
+    background:transparent; color:var(--text-faint); font-family:'IBM Plex Mono',monospace;
+    font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:all .15s ease;
+  }
+  .rail button:hover{color:var(--text); border-color:var(--accent-dim);}
+  .rail button.active{background:var(--accent); color:#031014; border-color:var(--accent); box-shadow:0 0 10px var(--accent-soft);}
+  .rail .nav-arrows{position:absolute; bottom:14px; display:flex; flex-direction:column; gap:6px;}
+  .rail .nav-arrows button{border-radius:6px; width:26px; height:22px;}
+
+  .progress{position:fixed; top:44px; left:52px; right:0; height:2px; background:var(--border); z-index:49;}
+  .progress i{display:block; height:100%; background:var(--accent); width:10%; transition:width .2s ease; box-shadow:0 0 6px var(--accent);}
+
+  main{margin-left:52px; padding-top:44px; scroll-snap-type:y proximity;}
+  section.slide{
+    min-height:calc(100svh - 44px); width:100%; padding:52px 64px 44px;
+    display:flex; flex-direction:column; justify-content:center; gap:22px;
+    scroll-snap-align:start; position:relative; border-bottom:1px solid var(--border);
+  }
+  section.slide::before{
+    content:attr(data-n); position:absolute; top:20px; right:64px;
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-faint); letter-spacing:0.08em;
+  }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--accent); display:flex; align-items:center; gap:8px;
+  }
+  .eyebrow::before{content:''; width:16px; height:1px; background:var(--accent);}
+  h1.title{font-size:clamp(26px,3vw,38px); line-height:1.15; max-width:20ch;}
+  .subtitle{color:var(--text-dim); font-size:15.5px; max-width:62ch;}
+
+  .core-msg{
+    border-left:3px solid var(--accent); padding:12px 18px; background:var(--surface);
+    font-family:'Rajdhani',sans-serif; font-weight:600; font-size:17px; color:var(--text);
+    max-width:64ch;
+  }
+  .core-msg b{color:var(--accent);}
+
+  .panel{background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px 18px;}
+  .panel h3{font-size:14px; color:var(--text); margin-bottom:8px; letter-spacing:0.02em;}
+
+  .grid{display:grid; gap:12px;}
+
+  /* status legend */
+  .stat{display:inline-flex; align-items:center; gap:6px; font-family:'IBM Plex Mono',monospace; font-size:11.5px;}
+  .stat .sw{width:9px; height:9px; border-radius:50%; flex:none;}
+  .stat.done .sw{background:var(--good); box-shadow:0 0 5px var(--accent-soft);}
+  .stat.done{color:var(--good);}
+  .stat.partial .sw{background:linear-gradient(90deg, var(--partial) 50%, transparent 50%); border:1px solid var(--partial);}
+  .stat.partial{color:var(--partial);}
+  .stat.planned .sw{border:1px solid var(--planned); background:transparent;}
+  .stat.planned{color:var(--text-faint);}
+  .legend{display:flex; gap:18px; flex-wrap:wrap; font-size:11.5px;}
+
+  .cite{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--text-faint);}
+  .cite a{color:var(--text-faint); text-decoration:underline; text-underline-offset:2px;}
+  .cite a:hover{color:var(--accent);}
+
+  .risk-pill{display:inline-block; padding:2px 9px; border-radius:20px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:600; letter-spacing:0.03em;}
+
+  table{border-collapse:collapse; width:100%; font-size:12.5px;}
+  th,td{border:1px solid var(--border); padding:7px 9px; text-align:left;}
+  th{background:var(--surface-2); font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:10.5px; letter-spacing:0.05em; color:var(--text-dim); text-transform:uppercase;}
+  td{color:var(--text-dim);}
+  td.center, th.center{text-align:center;}
+
+  figure{margin:0;}
+  figcaption{font-size:11.5px; color:var(--text-faint); margin-top:6px;}
+  svg text{fill:currentColor; font-family:'IBM Plex Mono',monospace;}
+
+  ul.plain{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px;}
+  ul.plain li{display:flex; gap:8px; align-items:flex-start; font-size:13px; color:var(--text-dim);}
+  ul.plain li::before{content:'—'; color:var(--text-faint); flex:none;}
+
+  .scroller{overflow-x:auto;}
+  @media (max-width:900px){
+    section.slide{padding:44px 22px 32px;}
+  }
+
+  .quote-final{font-family:'Rajdhani',sans-serif; font-weight:600; font-size:clamp(19px,2.4vw,27px); line-height:1.4; max-width:32ch; color:var(--text);}
+  .quote-final b{color:var(--accent);}
+</style>
+
+<div class="topbar">
+  <div class="brand"><span class="mark"></span>CROWDLENS</div>
+  <div class="status">
+    <span><i class="dot"></i>SYSTEM ONLINE</span>
+    <span><i class="dot warn"></i>LIVE DEMO PATH</span>
+    <span id="slideCounter" class="mono">01 / 10</span>
+  </div>
+</div>
+<div class="progress"><i id="progressBar"></i></div>
+<div class="rail" id="rail">
+  <div class="nav-arrows">
+    <button id="prevBtn" title="Previous">▲</button>
+    <button id="nextBtn" title="Next">▼</button>
+  </div>
+</div>
+
+<main id="main">
+
+<!-- ============ SLIDE 1 ============ -->
+<section class="slide" id="s1" data-n="01 — PROBLEM">
+  <div class="eyebrow">Problem &amp; Indian Context</div>
+  <h1 class="title">Why Crowd Safety Needs Prediction, Not Just Surveillance</h1>
+
+  <div style="display:grid; grid-template-columns:1.3fr 1fr; gap:28px; align-items:start;">
+    <div>
+      <div style="display:flex; flex-direction:column; gap:0;">
+        <!-- timeline -->
+        <div style="display:flex; gap:0; border-left:2px solid var(--border-strong); padding-left:0;">
+        </div>
+        <div class="grid" style="grid-template-columns:repeat(5,1fr); gap:10px;">
+          <div class="panel" style="padding:12px 13px;">
+            <div class="mono" style="color:var(--text-faint); font-size:10px;">JUL 2024 · TEMPLE / SATSANG</div>
+            <div style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:26px; color:var(--red); margin:4px 0 2px;">121 dead</div>
+            <div style="font-size:11.5px; color:var(--text-dim);">Hathras, UP — religious gathering, ~250k attended vs. ~80k permitted</div>
+            <div class="cite" style="margin-top:8px;"><a href="https://en.wikipedia.org/wiki/2024_Hathras_crowd_crush" target="_blank">Wikipedia — 2024 Hathras crowd crush</a></div>
+          </div>
+          <div class="panel" style="padding:12px 13px;">
+            <div class="mono" style="color:var(--text-faint); font-size:10px;">JAN 2025 · TEMPLE FESTIVAL</div>
+            <div style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:26px; color:var(--red); margin:4px 0 2px;">6 dead</div>
+            <div style="font-size:11.5px; color:var(--text-dim);">Tirupati — crush while queuing for darshan tokens</div>
+            <div class="cite" style="margin-top:8px;"><a href="https://www.oneindia.com/india/10-major-stampedes-in-india-since-2024-ashok-dham-hathras-maha-kumbh-and-more-8178463.html" target="_blank">Oneindia News, Jan 2025</a></div>
+          </div>
+          <div class="panel" style="padding:12px 13px;">
+            <div class="mono" style="color:var(--text-faint); font-size:10px;">JAN 2025 · TEMPLE FESTIVAL</div>
+            <div style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:26px; color:var(--red); margin:4px 0 2px;">30+ dead</div>
+            <div style="font-size:11.5px; color:var(--text-dim);">Prayagraj Maha Kumbh Mela — Mauni Amavasya crush</div>
+            <div class="cite" style="margin-top:8px;"><a href="https://www.aljazeera.com/news/2025/1/29/several-reported-killed-in-crush-at-religious-festival-in-india" target="_blank">Al Jazeera, 29 Jan 2025</a></div>
+          </div>
+          <div class="panel" style="padding:12px 13px;">
+            <div class="mono" style="color:var(--text-faint); font-size:10px;">FEB 2025 · PUBLIC / TRANSIT</div>
+            <div style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:26px; color:var(--red); margin:4px 0 2px;">18 dead</div>
+            <div style="font-size:11.5px; color:var(--text-dim);">New Delhi Railway Station — Kumbh-bound crowd surge on a footbridge</div>
+            <div class="cite" style="margin-top:8px;"><a href="https://www.pbs.org/newshour/world/stampede-at-new-delhi-railway-station-in-india-leaves-at-least-18-people-dead" target="_blank">PBS NewsHour, 16 Feb 2025</a></div>
+          </div>
+          <div class="panel" style="padding:12px 13px;">
+            <div class="mono" style="color:var(--text-faint); font-size:10px;">JUN 2025 · STADIUM</div>
+            <div style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:26px; color:var(--red); margin:4px 0 2px;">11 dead</div>
+            <div style="font-size:11.5px; color:var(--text-dim);">Bengaluru, M. Chinnaswamy Stadium — RCB victory crush, 35k capacity vs. ~3 lakh crowd</div>
+            <div class="cite" style="margin-top:8px;"><a href="https://en.wikipedia.org/wiki/2025_Bengaluru_crowd_crush" target="_blank">Wikipedia — 2025 Bengaluru crowd crush</a></div>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:10px; padding:12px 13px;">
+          <div class="mono" style="color:var(--text-faint); font-size:10px;">SEP 2025 · POLITICAL RALLY / PROCESSION</div>
+          <div style="font-family:'Rajdhani',sans-serif; font-weight:700; font-size:26px; color:var(--red); margin:4px 0 2px;">41 dead, ~100 injured</div>
+          <div style="font-size:11.5px; color:var(--text-dim);">Karur, Tamil Nadu — crowd trailing a delayed roadshow, poor crowd control</div>
+          <div class="cite" style="margin-top:8px;"><a href="https://en.wikipedia.org/wiki/2025_Karur_crowd_crush" target="_blank">Wikipedia — 2025 Karur crowd crush</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      <div class="panel">
+        <h3>India is already heavily surveilled</h3>
+        <div style="display:flex; gap:18px; margin:10px 0 6px;">
+          <div>
+            <div class="mono" style="font-size:24px; color:var(--accent); font-weight:600;">551,500</div>
+            <div style="font-size:11px; color:var(--text-dim);">CCTV cameras in Delhi alone — among the most surveilled cities on earth</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:18px;">
+          <div>
+            <div class="mono" style="font-size:24px; color:var(--accent); font-weight:600;">79 / 1000</div>
+            <div style="font-size:11px; color:var(--text-dim);">people — Hyderabad's camera density, the highest of any city worldwide</div>
+          </div>
+        </div>
+        <div class="cite" style="margin-top:10px;">
+          <a href="https://theprint.in/india/hyderabad-chennai-delhi-among-worlds-top-50-most-surveilled-cities-says-report/466219/" target="_blank">ThePrint, citing Comparitech surveillance index</a> ·
+          <a href="https://www.comparitech.com/vpn-privacy/the-worlds-most-surveilled-cities/" target="_blank">Comparitech</a>
+        </div>
+      </div>
+      <div class="core-msg">The problem is not the lack of <b>cameras</b>.<br>The problem is the lack of <b>intelligence</b> on top of those cameras.</div>
+      <div style="font-size:12px; color:var(--text-faint);">Every incident above spans a different category CROWDLENS targets — temple festival, transit, stadium, and political-rally crowds — each recorded on camera, none of it acted on in time.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 2 ============ -->
+<section class="slide" id="s2" data-n="02 — DRIVERS">
+  <div class="eyebrow">Problem Drivers &amp; Crowd Context</div>
+  <h1 class="title">Understanding Why Crowds Become Dangerous</h1>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:28px;">
+    <div>
+      <h3 style="color:var(--text-dim); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;">A — Problem Drivers</h3>
+      <div class="grid" style="grid-template-columns:1fr 1fr; gap:8px;">
+        <div class="panel" style="padding:10px 12px; font-size:12.5px;">Crowd aggregation</div>
+        <div class="panel" style="padding:10px 12px; font-size:12.5px;">Constrained spaces</div>
+        <div class="panel" style="padding:10px 12px; font-size:12.5px;">Bottlenecks</div>
+        <div class="panel" style="padding:10px 12px; font-size:12.5px;">Inflow &gt; Outflow</div>
+        <div class="panel" style="padding:10px 12px; font-size:12.5px;">Sudden disturbances</div>
+        <div class="panel" style="padding:10px 12px; font-size:12.5px;">Competing crowd flows</div>
+        <div class="panel" style="padding:10px 12px; font-size:12.5px;">Age / vulnerability mix</div>
+        <div class="panel" style="padding:10px 12px; font-size:12.5px;">Infrastructure limits</div>
+      </div>
+    </div>
+    <div>
+      <h3 style="color:var(--text-dim); font-size:12px; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;">B — Crowd Spatial Context</h3>
+      <div class="grid" style="grid-template-columns:1fr 1fr 1fr; gap:8px;">
+        <div class="panel" style="padding:10px; text-align:center;">
+          <svg viewBox="0 0 60 40" width="100%" height="34" role="img" aria-label="Open / dispersive — arrows spreading outward"><g stroke="currentColor" stroke-width="1.6" fill="none"><line x1="30" y1="20" x2="10" y2="6"/><line x1="30" y1="20" x2="50" y2="6"/><line x1="30" y1="20" x2="8" y2="20"/><line x1="30" y1="20" x2="52" y2="20"/><line x1="30" y1="20" x2="10" y2="34"/><line x1="30" y1="20" x2="50" y2="34"/></g><circle cx="30" cy="20" r="2.5" fill="currentColor"/></svg>
+          <div style="font-size:11px; margin-top:4px;">Open / dispersive</div>
+        </div>
+        <div class="panel" style="padding:10px; text-align:center;">
+          <svg viewBox="0 0 60 40" width="100%" height="34" role="img" aria-label="Unidirectional — parallel arrows one way"><g stroke="currentColor" stroke-width="1.6"><line x1="8" y1="10" x2="46" y2="10"/><line x1="8" y1="20" x2="46" y2="20"/><line x1="8" y1="30" x2="46" y2="30"/></g><g fill="currentColor"><polygon points="46,7 54,10 46,13"/><polygon points="46,17 54,20 46,23"/><polygon points="46,27 54,30 46,33"/></g></svg>
+          <div style="font-size:11px; margin-top:4px;">Unidirectional</div>
+        </div>
+        <div class="panel" style="padding:10px; text-align:center;">
+          <svg viewBox="0 0 60 40" width="100%" height="34" role="img" aria-label="Multidirectional — crossing arrows"><g stroke="currentColor" stroke-width="1.6"><line x1="8" y1="8" x2="52" y2="32"/><line x1="52" y1="8" x2="8" y2="32"/><line x1="30" y1="4" x2="30" y2="36"/></g><g fill="currentColor"><polygon points="49,29 55,33 51,35"/><polygon points="11,29 5,33 9,35"/><polygon points="27,33 30,39 33,33"/></g></svg>
+          <div style="font-size:11px; margin-top:4px;">Multidirectional</div>
+        </div>
+        <div class="panel" style="padding:10px; text-align:center;">
+          <svg viewBox="0 0 60 40" width="100%" height="34" role="img" aria-label="Converging — arrows meeting at a point"><g stroke="currentColor" stroke-width="1.6"><line x1="10" y1="6" x2="30" y2="20"/><line x1="50" y1="6" x2="30" y2="20"/><line x1="10" y1="34" x2="30" y2="20"/><line x1="50" y1="34" x2="30" y2="20"/></g><circle cx="30" cy="20" r="3" fill="var(--red)"/></svg>
+          <div style="font-size:11px; margin-top:4px;">Converging</div>
+        </div>
+        <div class="panel" style="padding:10px; text-align:center;">
+          <svg viewBox="0 0 60 40" width="100%" height="34" role="img" aria-label="Dispersing — arrows leaving a point"><g stroke="currentColor" stroke-width="1.6"><line x1="30" y1="20" x2="10" y2="6"/><line x1="30" y1="20" x2="50" y2="6"/><line x1="30" y1="20" x2="10" y2="34"/><line x1="30" y1="20" x2="50" y2="34"/></g><g fill="currentColor"><polygon points="8,4 6,10 12,8"/><polygon points="52,4 54,10 48,8"/><polygon points="8,36 6,30 12,32"/><polygon points="52,36 54,30 48,32"/></g></svg>
+          <div style="font-size:11px; margin-top:4px;">Dispersing</div>
+        </div>
+        <div class="panel" style="padding:10px; text-align:center;">
+          <svg viewBox="0 0 60 40" width="100%" height="34" role="img" aria-label="Constrained — arrows squeezed through a gap"><g stroke="currentColor" stroke-width="1.6" fill="none"><rect x="4" y="2" width="10" height="12"/><rect x="4" y="26" width="10" height="12"/><rect x="46" y="2" width="10" height="12"/><rect x="46" y="26" width="10" height="12"/><line x1="16" y1="20" x2="44" y2="20"/></g><polygon points="44,17 52,20 44,23" fill="currentColor"/></svg>
+          <div style="font-size:11px; margin-top:4px;">Constrained</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 920 120" width="100%" height="118" role="img" aria-label="Multiple streams converge into one point, accumulate, compress, and become risk">
+      <defs><marker id="arw2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L8,4L0,8Z" fill="currentColor"/></marker></defs>
+      <g stroke="currentColor" stroke-width="1.6" fill="none" marker-end="url(#arw2)">
+        <line x1="20" y1="20" x2="205" y2="55"/>
+        <line x1="20" y1="60" x2="205" y2="60"/>
+        <line x1="20" y1="100" x2="205" y2="65"/>
+      </g>
+      <circle cx="215" cy="60" r="5" fill="currentColor"/>
+      <text x="140" y="20" font-size="10.5" text-anchor="middle" opacity="0.75">stream A</text>
+      <text x="140" y="80" font-size="10.5" text-anchor="middle" opacity="0.75">stream B</text>
+      <text x="140" y="112" font-size="10.5" text-anchor="middle" opacity="0.75">stream C</text>
+      <line x1="225" y1="60" x2="345" y2="60" stroke="currentColor" stroke-width="1.6" marker-end="url(#arw2)"/>
+      <text x="285" y="42" font-size="11" text-anchor="middle">accumulation</text>
+      <line x1="355" y1="60" x2="495" y2="60" stroke="currentColor" stroke-width="1.6" marker-end="url(#arw2)"/>
+      <text x="425" y="42" font-size="11" text-anchor="middle">compression</text>
+      <line x1="505" y1="60" x2="640" y2="60" stroke="var(--red)" stroke-width="2" marker-end="url(#arw2)"/>
+      <rect x="650" y="34" width="120" height="52" rx="6" fill="none" stroke="var(--red)" stroke-width="1.6"/>
+      <text x="710" y="56" font-size="13" text-anchor="middle" fill="var(--red)" font-weight="600">RISK</text>
+      <text x="710" y="72" font-size="9.5" text-anchor="middle" fill="var(--red)" opacity="0.85">same crowd, less space</text>
+    </svg>
+    <figcaption>Same head-count, different spatial context and flow → different risk. Convergence into a shrinking area is what turns a crowd into a hazard.</figcaption>
+  </figure>
+</section>
+
+<!-- ============ SLIDE 3 ============ -->
+<section class="slide" id="s3" data-n="03 — STAKEHOLDERS">
+  <div class="eyebrow">Target Users &amp; Perspectives</div>
+  <h1 class="title">One Crowd, Multiple Stakeholder Perspectives</h1>
+
+  <div class="grid" style="grid-template-columns:repeat(5,1fr); gap:12px;">
+    <div class="panel">
+      <div class="mono" style="color:var(--accent); font-size:11px;">01</div>
+      <h3>Police / Security</h3>
+      <ul class="plain"><li>Crowd control</li><li>Escalation points</li><li>Bottlenecks</li><li>Volatile zones</li></ul>
+    </div>
+    <div class="panel">
+      <div class="mono" style="color:var(--accent); font-size:11px;">02</div>
+      <h3>Rescue / Fire Team</h3>
+      <ul class="plain"><li>Incident location</li><li>Blocked routes</li><li>Fallen-person alerts</li><li>Evacuation path</li></ul>
+    </div>
+    <div class="panel">
+      <div class="mono" style="color:var(--accent); font-size:11px;">03</div>
+      <h3>Event / Religious Organizer</h3>
+      <ul class="plain"><li>Entry / exit flow</li><li>Queue build-up</li><li>Capacity limits</li><li>Accumulation</li></ul>
+    </div>
+    <div class="panel">
+      <div class="mono" style="color:var(--accent); font-size:11px;">04</div>
+      <h3>Administration / Leadership</h3>
+      <ul class="plain"><li>Overall risk</li><li>Incident overview</li><li>Resource allocation</li><li>Emergency coordination</li></ul>
+    </div>
+    <div class="panel">
+      <div class="mono" style="color:var(--accent); font-size:11px;">05</div>
+      <h3>Public</h3>
+      <ul class="plain"><li>Safe zones</li><li>Unsafe zones</li><li>Evacuation direction</li><li>Emergency info</li></ul>
+    </div>
+  </div>
+
+  <div class="core-msg">The same crowd intelligence must be <b>presented differently</b> depending on who is responsible for the next action.</div>
+</section>
+
+<!-- ============ SLIDE 4 ============ -->
+<section class="slide" id="s4" data-n="04 — REQUIREMENT MATRIX">
+  <div class="eyebrow">Hackathon Requirement → Solution Matrix</div>
+  <h1 class="title">Requirement-to-Solution Mapping</h1>
+  <div class="subtitle">Requirements as documented in CROWDLENS's own problem framing (README · project documentation) — mapped against solution capabilities before anything was built.</div>
+
+  <div class="legend">
+    <span class="stat done"><i class="sw"></i>✓ Implemented — running today</span>
+    <span class="stat partial"><i class="sw"></i>◐ Partially implemented — verified prototype, not wired to the live app</span>
+    <span class="stat planned"><i class="sw"></i>○ Designed / Planned</span>
+  </div>
+
+  <div class="scroller">
+    <table class="mono">
+      <thead><tr>
+        <th style="min-width:220px;">Requirement</th>
+        <th class="center">People Detect.</th><th class="center">Anon. Tracking</th><th class="center">Density &amp; Occup.</th>
+        <th class="center">Inflow/Outflow</th><th class="center">Crowd Dynamics</th><th class="center">Risk Prediction</th>
+        <th class="center">Structural Risk</th><th class="center">Evacuation</th><th class="center">Alerts</th><th class="center">Privacy</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="code" style="color:var(--text);">Detect &amp; count people from CCTV / video</td><td class="center" style="color:var(--good);">✓</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td></tr>
+        <tr><td class="code" style="color:var(--text);">Anonymous tracking — never identify individuals</td><td class="center">—</td><td class="center" style="color:var(--partial);">◐</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center" style="color:var(--good);">✓</td></tr>
+        <tr><td class="code" style="color:var(--text);">Crowd density &amp; per-zone occupancy</td><td class="center">—</td><td class="center">—</td><td class="center" style="color:var(--good);">✓</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td></tr>
+        <tr><td class="code" style="color:var(--text);">Inflow / outflow &amp; flow-imbalance detection</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center" style="color:var(--partial);">◐</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td></tr>
+        <tr><td class="code" style="color:var(--text);">Crowd dynamics — compression, bottleneck, reverse-flow</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center" style="color:var(--partial);">◐</td><td class="center" style="color:var(--good);">✓</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td></tr>
+        <tr><td class="code" style="color:var(--text);">Real-time 0–100 risk scoring, 5-band severity</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center" style="color:var(--good);">✓</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td></tr>
+        <tr><td class="code" style="color:var(--text);">Predictive early warning — forecast, time-to-critical</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center" style="color:var(--partial);">◐</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td></tr>
+        <tr><td class="code" style="color:var(--text);">Structural / physical-load risk indicator</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center" style="color:var(--partial);">◐</td><td class="center">—</td><td class="center">—</td><td class="center">—</td></tr>
+        <tr><td class="code" style="color:var(--text);">Evacuation &amp; rescue-route guidance</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center" style="color:var(--planned);">○</td><td class="center">—</td><td class="center">—</td></tr>
+        <tr><td class="code" style="color:var(--text);">Human-in-the-loop alerting, recommended action &amp; audit</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center" style="color:var(--good);">✓</td><td class="center" style="color:var(--good);">✓</td></tr>
+        <tr><td class="code" style="color:var(--text);">Multi-camera / multi-zone coverage</td><td class="center">—</td><td class="center">—</td><td class="center" style="color:var(--partial);">◐</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td><td class="center">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="core-msg" style="margin-top:2px;">We mapped every requirement to a concrete capability <b>before</b> prioritizing what to build first.</div>
+</section>
+
+<!-- ============ SLIDE 5 ============ -->
+<section class="slide" id="s5" data-n="05 — MODULES">
+  <div class="eyebrow">CROWDLENS Solution Modules</div>
+  <h1 class="title">CROWDLENS Solution Modules</h1>
+
+  <div class="grid" style="grid-template-columns:repeat(3,1fr); gap:10px;">
+    <div class="panel">
+      <h3>Crowd Analytics</h3>
+      <ul class="plain">
+        <li>Density &amp; occupancy <span class="stat done" style="margin-left:4px;"><i class="sw"></i>✓</span></li>
+        <li>Zone-level people counts <span class="stat done" style="margin-left:4px;"><i class="sw"></i>✓</span></li>
+        <li>Multi-camera aggregation <span class="stat planned" style="margin-left:4px;"><i class="sw"></i>○</span></li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Crowd Dynamics</h3>
+      <ul class="plain">
+        <li>Movement &amp; turbulence (optical flow) <span class="stat done" style="margin-left:4px;"><i class="sw"></i>✓</span></li>
+        <li>Compression / spacing <span class="stat done" style="margin-left:4px;"><i class="sw"></i>✓</span></li>
+        <li>Bottleneck &amp; reverse-flow <span class="stat partial" style="margin-left:4px;"><i class="sw"></i>◐</span></li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Early Warning &amp; Risk</h3>
+      <ul class="plain">
+        <li>0–100 SRI, 5-band severity <span class="stat done" style="margin-left:4px;"><i class="sw"></i>✓</span></li>
+        <li>Auto-alert on RED / BLACK <span class="stat done" style="margin-left:4px;"><i class="sw"></i>✓</span></li>
+        <li>Contributing-factor ranking <span class="stat done" style="margin-left:4px;"><i class="sw"></i>✓</span></li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Predictive Analytics</h3>
+      <ul class="plain">
+        <li>+N sec trend forecast <span class="stat partial" style="margin-left:4px;"><i class="sw"></i>◐</span></li>
+        <li>Time-to-critical estimate <span class="stat partial" style="margin-left:4px;"><i class="sw"></i>◐</span></li>
+        <li>Confidence scoring <span class="stat partial" style="margin-left:4px;"><i class="sw"></i>◐</span></li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>What-If / Preemptive</h3>
+      <ul class="plain">
+        <li>Controlled evaluation replay <span class="stat partial" style="margin-left:4px;"><i class="sw"></i>◐</span></li>
+        <li>Entry-control simulation <span class="stat planned" style="margin-left:4px;"><i class="sw"></i>○</span></li>
+        <li>Scenario timeline authoring <span class="stat partial" style="margin-left:4px;"><i class="sw"></i>◐</span></li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Command Center</h3>
+      <ul class="plain">
+        <li>Live control-room dashboard <span class="stat done" style="margin-left:4px;"><i class="sw"></i>✓</span></li>
+        <li>Crowd video library &amp; search <span class="stat done" style="margin-left:4px;"><i class="sw"></i>✓</span></li>
+        <li>System / detector health panel <span class="stat done" style="margin-left:4px;"><i class="sw"></i>✓</span></li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Rescue &amp; Evacuation</h3>
+      <ul class="plain">
+        <li>Fallen-person heuristic <span class="stat partial" style="margin-left:4px;"><i class="sw"></i>◐</span></li>
+        <li>Incident location flagging <span class="stat planned" style="margin-left:4px;"><i class="sw"></i>○</span></li>
+        <li>Dynamic evacuation routing <span class="stat planned" style="margin-left:4px;"><i class="sw"></i>○</span></li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Public Safety</h3>
+      <ul class="plain">
+        <li>Safe / unsafe zone display <span class="stat planned" style="margin-left:4px;"><i class="sw"></i>○</span></li>
+        <li>Emergency information feed <span class="stat planned" style="margin-left:4px;"><i class="sw"></i>○</span></li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Privacy &amp; Audit</h3>
+      <ul class="plain">
+        <li>No facial recognition, ephemeral IDs <span class="stat done" style="margin-left:4px;"><i class="sw"></i>✓</span></li>
+        <li>Alert acknowledge history (SQLite) <span class="stat done" style="margin-left:4px;"><i class="sw"></i>✓</span></li>
+        <li>Full incident audit timeline <span class="stat partial" style="margin-left:4px;"><i class="sw"></i>◐</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 6 ============ -->
+<section class="slide" id="s6" data-n="06 — ARCHITECTURE">
+  <div class="eyebrow">System Architecture</div>
+  <h1 class="title">From Multi-Source Video to Actionable Safety Intelligence</h1>
+
+  <div style="display:flex; flex-direction:column; gap:6px;">
+    <div class="panel" style="display:grid; grid-template-columns:110px 1fr; gap:14px; align-items:center; padding:10px 14px;">
+      <div class="mono" style="font-size:10.5px; color:var(--text-faint);">L1 · INPUT</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--good); border:1px solid var(--good);">Recorded / uploaded video ✓</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--text-faint); border:1px solid var(--planned);">Live CCTV / RTSP ○</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--text-faint); border:1px solid var(--planned);">Drone feed ○</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--text-faint); border:1px solid var(--planned);">Multi-camera array ○</span>
+      </div>
+    </div>
+    <div class="panel" style="display:grid; grid-template-columns:110px 1fr; gap:14px; align-items:center; padding:10px 14px; border-color:var(--partial);">
+      <div class="mono" style="font-size:10.5px; color:var(--text-faint);">L2 · FOUNDATION</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--text-faint); border:1px solid var(--planned);">Time frame of reference — sync feeds by timestamp ○</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--text-faint); border:1px solid var(--planned);">Spatial frame of reference — camera pose &amp; zone coverage ○</span>
+      </div>
+    </div>
+    <div class="panel" style="display:grid; grid-template-columns:110px 1fr; gap:14px; align-items:center; padding:10px 14px;">
+      <div class="mono" style="font-size:10.5px; color:var(--text-faint);">L3 · PERCEPTION</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--good); border:1px solid var(--good);">Person detection ✓</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--partial); border:1px solid var(--partial);">Anonymous tracking ◐</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--text-faint); border:1px solid var(--planned);">Pose estimation ○</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--good); border:1px solid var(--good);">Optical flow ✓</span>
+      </div>
+    </div>
+    <div class="panel" style="display:grid; grid-template-columns:110px 1fr; gap:14px; align-items:center; padding:10px 14px;">
+      <div class="mono" style="font-size:10.5px; color:var(--text-faint);">L4 · CROWD INTEL</div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--good); border:1px solid var(--good);">Density ✓</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--good); border:1px solid var(--good);">Occupancy ✓</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--text-faint); border:1px solid var(--planned);">Demographics ○</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--partial); border:1px solid var(--partial);">Inflow ◐</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--partial); border:1px solid var(--partial);">Outflow ◐</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--good); border:1px solid var(--good);">Accumulation ✓</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--good); border:1px solid var(--good);">Compression ✓</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--partial); border:1px solid var(--partial);">Direction ◐</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--partial); border:1px solid var(--partial);">Bottleneck ◐</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--partial); border:1px solid var(--partial);">Edge pressure ◐</span>
+      </div>
+    </div>
+    <div class="panel" style="display:grid; grid-template-columns:110px 1fr; gap:14px; align-items:center; padding:10px 14px;">
+      <div class="mono" style="font-size:10.5px; color:var(--text-faint);">L5 · ANALYTICS</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--good); border:1px solid var(--good);">Descriptive ✓</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--partial); border:1px solid var(--partial);">Predictive ◐</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--partial); border:1px solid var(--partial);">Preemptive / what-if ◐</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--partial); border:1px solid var(--partial);">Prescriptive ◐</span>
+      </div>
+    </div>
+    <div class="panel" style="display:grid; grid-template-columns:110px 1fr; gap:14px; align-items:center; padding:10px 14px;">
+      <div class="mono" style="font-size:10.5px; color:var(--text-faint);">L6 · ACTION</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--good); border:1px solid var(--good);">Alerts ✓</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--good); border:1px solid var(--good);">Command center ✓</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--text-faint); border:1px solid var(--planned);">Rescue ○</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--text-faint); border:1px solid var(--planned);">Evacuation ○</span>
+        <span class="risk-pill" style="background:var(--surface-2); color:var(--text-faint); border:1px solid var(--planned);">Public safety ○</span>
+      </div>
+    </div>
+  </div>
+  <div class="core-msg" style="border-color:var(--partial);">Time framing and spatial/camera-angle framing are the <b>foundation</b> for trustworthy multi-camera analytics — not built yet because today's build fuses a single feed at a time, where naive per-frame timing is sufficient. The moment a second camera joins, both layers become mandatory.</div>
+</section>
+
+<!-- ============ SLIDE 7 ============ -->
+<section class="slide" id="s7" data-n="07 — DYNAMICS">
+  <div class="eyebrow">Crowd Dynamics &amp; Behavioural Profiling</div>
+  <h1 class="title">Understanding How the Crowd Behaves</h1>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+    <div>
+      <h3 style="color:var(--text-dim); font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase;">Measurable Signals</h3>
+      <div class="grid" style="grid-template-columns:1fr 1fr; gap:5px; font-size:11.5px; margin-top:8px;">
+        <div>Density <span class="stat done"><i class="sw"></i>✓</span></div>
+        <div>Occupancy <span class="stat done"><i class="sw"></i>✓</span></div>
+        <div>Accumulation rate <span class="stat done"><i class="sw"></i>✓</span></div>
+        <div>Velocity <span class="stat done"><i class="sw"></i>✓</span></div>
+        <div>Interpersonal distance <span class="stat done"><i class="sw"></i>✓</span></div>
+        <div>Compression <span class="stat done"><i class="sw"></i>✓</span></div>
+        <div>Inflow / outflow rate <span class="stat partial"><i class="sw"></i>◐</span></div>
+        <div>Direction entropy <span class="stat partial"><i class="sw"></i>◐</span></div>
+        <div>Reverse-flow ratio <span class="stat partial"><i class="sw"></i>◐</span></div>
+        <div>Bottleneck / edge-pressure <span class="stat partial"><i class="sw"></i>◐</span></div>
+        <div>Flow imbalance <span class="stat planned"><i class="sw"></i>○</span></div>
+      </div>
+      <h3 style="color:var(--text-dim); font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase; margin-top:16px;">Demographic Profile — aggregate, zone-level only</h3>
+      <div style="font-size:11.5px; margin-top:6px;">Age groups · children / adults / elderly · group composition <span class="stat planned"><i class="sw"></i>○ Planned — never linked to identity</span></div>
+    </div>
+
+    <div>
+      <h3 style="color:var(--text-dim); font-size:11.5px; letter-spacing:0.08em; text-transform:uppercase;">Dynamic Behaviour</h3>
+      <div style="font-size:11.5px; color:var(--text-dim); margin:8px 0;">
+        A rule-based classifier scores compression + turbulence + reverse-flow into four coarse states today <span class="stat partial"><i class="sw"></i>◐ prototype</span>; the finer six-state taxonomy below is the design target.
+      </div>
+      <div class="grid" style="grid-template-columns:1fr 1fr 1fr; gap:6px;">
+        <div class="panel" style="padding:8px; text-align:center; font-size:11px;">Stationary<br><span style="color:var(--text-faint); font-size:9.5px;">≈ PASSIVE</span></div>
+        <div class="panel" style="padding:8px; text-align:center; font-size:11px;">Flow<br><span style="color:var(--text-faint); font-size:9.5px;">≈ ACTIVE</span></div>
+        <div class="panel" style="padding:8px; text-align:center; font-size:11px;">Disturbed<br><span style="color:var(--text-faint); font-size:9.5px;">◐ signal</span></div>
+        <div class="panel" style="padding:8px; text-align:center; font-size:11px;">Volatile<br><span style="color:var(--text-faint); font-size:9.5px;">≈ VOLATILE</span></div>
+        <div class="panel" style="padding:8px; text-align:center; font-size:11px;">Reverse Flow<br><span style="color:var(--text-faint); font-size:9.5px;">◐ ratio</span></div>
+        <div class="panel" style="padding:8px; text-align:center; font-size:11px;">Stop-Wave<br><span style="color:var(--text-faint); font-size:9.5px;">○ planned</span></div>
+      </div>
+    </div>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 940 130" width="100%" height="128" role="img" aria-label="Illustrative example: inflow of 60 per minute exceeding outflow of 30 per minute causes accumulation, then density increase, then compression, then escalating risk">
+      <defs><marker id="arw3" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L8,4L0,8Z" fill="currentColor"/></marker></defs>
+      <g font-size="11">
+        <rect x="4" y="10" width="150" height="46" rx="5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <text x="79" y="28" text-anchor="middle" fill="currentColor">Inflow</text>
+        <text x="79" y="45" text-anchor="middle" font-weight="600" fill="currentColor">60 / min</text>
+
+        <rect x="4" y="72" width="150" height="46" rx="5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+        <text x="79" y="90" text-anchor="middle" fill="currentColor">Outflow</text>
+        <text x="79" y="107" text-anchor="middle" font-weight="600" fill="currentColor">30 / min</text>
+
+        <line x1="158" y1="33" x2="230" y2="60" stroke="currentColor" stroke-width="1.4" marker-end="url(#arw3)"/>
+        <line x1="158" y1="95" x2="230" y2="65" stroke="currentColor" stroke-width="1.4" marker-end="url(#arw3)"/>
+
+        <rect x="238" y="42" width="130" height="46" rx="5" fill="none" stroke="var(--yellow)" stroke-width="1.6"/>
+        <text x="303" y="60" text-anchor="middle" fill="var(--yellow)">Imbalance</text>
+        <text x="303" y="77" text-anchor="middle" font-weight="600" fill="var(--yellow)">+30 / min</text>
+
+        <line x1="372" y1="65" x2="432" y2="65" stroke="currentColor" stroke-width="1.4" marker-end="url(#arw3)"/>
+        <rect x="440" y="42" width="130" height="46" rx="5" fill="none" stroke="var(--orange)" stroke-width="1.6"/>
+        <text x="505" y="60" text-anchor="middle" fill="var(--orange)">Density ↑</text>
+        <text x="505" y="77" text-anchor="middle" font-size="9.5" fill="var(--orange)">spacing shrinks</text>
+
+        <line x1="574" y1="65" x2="634" y2="65" stroke="currentColor" stroke-width="1.4" marker-end="url(#arw3)"/>
+        <rect x="642" y="42" width="130" height="46" rx="5" fill="none" stroke="var(--red)" stroke-width="1.6"/>
+        <text x="707" y="60" text-anchor="middle" fill="var(--red)">Compression ↑</text>
+        <text x="707" y="77" text-anchor="middle" font-size="9.5" fill="var(--red)">people packed tighter</text>
+
+        <line x1="776" y1="65" x2="828" y2="65" stroke="var(--red)" stroke-width="1.8" marker-end="url(#arw3)"/>
+        <rect x="836" y="34" width="98" height="62" rx="5" fill="none" stroke="var(--red)" stroke-width="2"/>
+        <text x="885" y="60" text-anchor="middle" fill="var(--red)" font-weight="700">RISK</text>
+        <text x="885" y="76" text-anchor="middle" fill="var(--red)" font-size="9">escalating</text>
+      </g>
+    </svg>
+    <figcaption>Illustrative example — the causal chain our risk engine is designed to detect (density × 40% + movement × 25% + build-up rate × 20% + compression × 15% in the running scorer). Numbers here are for explanation, not a captured reading.</figcaption>
+  </figure>
+</section>
+
+<!-- ============ SLIDE 8 ============ -->
+<section class="slide" id="s8" data-n="08 — ANALYTICS SPECTRUM">
+  <div class="eyebrow">Analytics Spectrum &amp; Early Warning</div>
+  <h1 class="title">From Seeing the Crowd to Deciding What to Do</h1>
+
+  <div class="grid" style="grid-template-columns:repeat(4,1fr); gap:10px;">
+    <div class="panel">
+      <div class="stat done"><i class="sw"></i>✓ Implemented</div>
+      <h3 style="margin-top:6px;">Descriptive</h3>
+      <div style="font-size:11.5px; color:var(--text-dim); font-style:italic;">"What is happening now?"</div>
+      <div style="font-size:11.5px; margin-top:6px;">Density, occupancy, flow, headcount</div>
+    </div>
+    <div class="panel">
+      <div class="stat partial"><i class="sw"></i>◐ Prototype, not wired</div>
+      <h3 style="margin-top:6px;">Predictive</h3>
+      <div style="font-size:11.5px; color:var(--text-dim); font-style:italic;">"What is likely to happen?"</div>
+      <div style="font-size:11.5px; margin-top:6px;">Risk forecast, time-to-critical</div>
+    </div>
+    <div class="panel">
+      <div class="stat partial"><i class="sw"></i>◐ Scripted replay only</div>
+      <h3 style="margin-top:6px;">Preemptive</h3>
+      <div style="font-size:11.5px; color:var(--text-dim); font-style:italic;">"What can we do before it happens?"</div>
+      <div style="font-size:11.5px; margin-top:6px;">What-if scenarios, entry control</div>
+    </div>
+    <div class="panel">
+      <div class="stat planned"><i class="sw"></i>○ Planned UI</div>
+      <h3 style="margin-top:6px;">Prescriptive</h3>
+      <div style="font-size:11.5px; color:var(--text-dim); font-style:italic;">"What should we do?"</div>
+      <div style="font-size:11.5px; margin-top:6px;">Evacuation route, resource recommendation</div>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1.15fr 0.85fr; gap:24px; align-items:center;">
+    <div class="grid" style="grid-template-columns:1fr 1fr; gap:6px; font-size:11.5px;">
+      <div>1. High Inflow–Low Outflow <span class="stat planned"><i class="sw"></i>○</span></div>
+      <div>2. Rapid Accumulation <span class="stat done"><i class="sw"></i>✓</span></div>
+      <div>3. Critical Density <span class="stat done"><i class="sw"></i>✓</span></div>
+      <div>4. Bottleneck Congestion <span class="stat partial"><i class="sw"></i>◐</span></div>
+      <div>5. Flow Imbalance <span class="stat planned"><i class="sw"></i>○</span></div>
+      <div>6. Reverse Flow <span class="stat partial"><i class="sw"></i>◐</span></div>
+      <div>7. Compression Increase <span class="stat done"><i class="sw"></i>✓</span></div>
+      <div>8. Edge Pressure <span class="stat partial"><i class="sw"></i>◐</span></div>
+      <div>9. Sudden Flow Disturbance <span class="stat done"><i class="sw"></i>✓</span></div>
+      <div>10. Fallen Person / Obstruction <span class="stat partial"><i class="sw"></i>◐</span></div>
+    </div>
+    <figure>
+      <svg viewBox="0 0 320 150" width="100%" height="146" role="img" aria-label="Multiple signals feed a risk engine that outputs the safety risk index and triggers an alert">
+        <defs><marker id="arw4" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L8,4L0,8Z" fill="currentColor"/></marker></defs>
+        <g stroke="currentColor" stroke-width="1.3" fill="none">
+          <line x1="4" y1="18" x2="90" y2="60" marker-end="url(#arw4)"/>
+          <line x1="4" y1="45" x2="90" y2="63" marker-end="url(#arw4)"/>
+          <line x1="4" y1="72" x2="90" y2="66" marker-end="url(#arw4)"/>
+          <line x1="4" y1="99" x2="90" y2="69" marker-end="url(#arw4)"/>
+          <line x1="4" y1="126" x2="90" y2="72" marker-end="url(#arw4)"/>
+        </g>
+        <text x="4" y="14" font-size="9" opacity="0.7">signals</text>
+        <rect x="96" y="46" width="88" height="40" rx="5" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <text x="140" y="70" text-anchor="middle" font-size="11">Risk Engine</text>
+        <line x1="184" y1="66" x2="222" y2="66" stroke="currentColor" stroke-width="1.6" marker-end="url(#arw4)"/>
+        <rect x="228" y="46" width="46" height="40" rx="5" fill="none" stroke="var(--accent)" stroke-width="1.8"/>
+        <text x="251" y="70" text-anchor="middle" font-size="11" fill="var(--accent)">SRI</text>
+        <line x1="251" y1="86" x2="251" y2="118" stroke="var(--red)" stroke-width="1.6" marker-end="url(#arw4)"/>
+        <rect x="206" y="122" width="90" height="24" rx="12" fill="none" stroke="var(--red)" stroke-width="1.6"/>
+        <text x="251" y="138" text-anchor="middle" font-size="10.5" fill="var(--red)">Alert</text>
+      </svg>
+      <figcaption>No single signal predicts a crush on its own — the engine weighs several together before a band changes.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ SLIDE 9 ============ -->
+<section class="slide" id="s9" data-n="09 — VALIDATION">
+  <div class="eyebrow">Implementation, Demo &amp; Validation</div>
+  <h1 class="title">What We Actually Built and How We Validate It</h1>
+
+  <div class="grid" style="grid-template-columns:1fr 1fr 1fr; gap:12px;">
+    <div class="panel" style="border-color:var(--good);">
+      <div class="stat done"><i class="sw"></i>A · IMPLEMENTED</div>
+      <ul class="plain" style="margin-top:8px; font-size:12px;">
+        <li>Multi-format upload + video library w/ categories</li>
+        <li>Real YOLOv8n detection (HOG+SVM fallback)</li>
+        <li>Density, optical-flow movement/turbulence, build-up rate, compression</li>
+        <li>0–100 weighted risk score, 5-band severity</li>
+        <li>4 zone bands with per-zone risk</li>
+        <li>Auto-alerts on RED/BLACK, acknowledge → persisted history</li>
+        <li>Live WebSocket + polling dashboard</li>
+        <li>14/14 automated tests passing</li>
+      </ul>
+    </div>
+    <div class="panel" style="border-color:var(--partial);">
+      <div class="stat partial"><i class="sw"></i>B · PARTIALLY IMPLEMENTED</div>
+      <ul class="plain" style="margin-top:8px; font-size:12px;">
+        <li>BYTE-style anonymous tracker — verified standalone service, not wired in</li>
+        <li>Bottleneck flow, reverse-flow, edge-pressure, 4-state dynamics classifier — prototype only</li>
+        <li>Predictive forecast + time-to-critical — unit-tested, no live UI</li>
+        <li>Structural-load indicator endpoint — computed, not surfaced</li>
+        <li>Incident escalate/resolve lifecycle — modeled, not wired</li>
+      </ul>
+    </div>
+    <div class="panel" style="border-color:var(--planned);">
+      <div class="stat planned"><i class="sw"></i>C · DESIGNED / FUTURE</div>
+      <ul class="plain" style="margin-top:8px; font-size:12px;">
+        <li>Multi-camera time &amp; spatial fusion</li>
+        <li>Live RTSP / CCTV ingestion</li>
+        <li>Demographic / vulnerability profiling</li>
+        <li>Dynamic evacuation routing</li>
+        <li>Public-facing safe-zone display</li>
+        <li>Interactive what-if scenario editor</li>
+      </ul>
+    </div>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 940 70" width="100%" height="68" role="img" aria-label="Demo flow: uploaded video through detection, density and dynamics, risk scoring, alert, and operator acknowledgement">
+      <defs><marker id="arw5" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L8,4L0,8Z" fill="currentColor"/></marker></defs>
+      <g font-size="10.5">
+        <text x="30" y="18" text-anchor="middle" opacity="0.8">Uploaded</text>
+        <text x="30" y="30" text-anchor="middle" opacity="0.8">Video</text>
+        <line x1="66" y1="24" x2="130" y2="24" stroke="currentColor" stroke-width="1.4" marker-end="url(#arw5)"/>
+        <text x="160" y="27" text-anchor="middle">Detection<tspan x="160" dy="12" font-size="9" opacity="0.65">YOLO / HOG</tspan></text>
+        <line x1="196" y1="24" x2="260" y2="24" stroke="currentColor" stroke-width="1.4" marker-end="url(#arw5)"/>
+        <text x="300" y="27" text-anchor="middle">Density + Dynamics<tspan x="300" dy="12" font-size="9" opacity="0.65">optical flow, compression</tspan></text>
+        <line x1="366" y1="24" x2="430" y2="24" stroke="currentColor" stroke-width="1.4" marker-end="url(#arw5)"/>
+        <text x="465" y="27" text-anchor="middle">Risk Score</text>
+        <line x1="500" y1="24" x2="564" y2="24" stroke="currentColor" stroke-width="1.4" marker-end="url(#arw5)"/>
+        <text x="597" y="27" text-anchor="middle" fill="var(--red)">Alert</text>
+        <line x1="628" y1="24" x2="692" y2="24" stroke="currentColor" stroke-width="1.4" marker-end="url(#arw5)"/>
+        <text x="725" y="27" text-anchor="middle">Operator Ack.</text>
+        <g opacity="0.55">
+          <line x1="760" y1="24" x2="820" y2="24" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#arw5)"/>
+          <text x="878" y="20" text-anchor="middle" font-size="9.5">Evacuation</text>
+          <text x="878" y="32" text-anchor="middle" font-size="8.5">○ designed/future</text>
+        </g>
+      </g>
+    </svg>
+    <figcaption>Actual single-feed demo path today. Multi-camera fusion (Video 1/2/3 → time alignment → zone mapping → …) is <b style="color:var(--text-dim);">designed / prototype / future enhancement</b>, not built.</figcaption>
+  </figure>
+
+  <div class="core-msg" style="border-color:var(--accent);">Validation today = <b>14/14 automated correctness tests</b> on the deterministic engines (risk formula, alert thresholds, scenario progression) — not accuracy against ground-truth footage. The evaluation schema stores an explicit <code class="code">is_measured=False</code> flag so target metrics can never be displayed as measured results.</div>
+</section>
+
+<!-- ============ SLIDE 10 ============ -->
+<section class="slide" id="s10" data-n="10 — IMPACT">
+  <div class="eyebrow">Innovation, Privacy &amp; Impact</div>
+  <h1 class="title">From Reactive CCTV to Predictive Crowd Safety</h1>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
+    <div class="panel">
+      <h3>Key Innovation</h3>
+      <ul class="plain" style="font-size:11.5px;">
+        <li>Multi-camera temporal framing <span class="stat planned"><i class="sw"></i>○</span></li>
+        <li>Spatial camera framing <span class="stat planned"><i class="sw"></i>○</span></li>
+        <li>Crowd dynamics intelligence <span class="stat done"><i class="sw"></i>✓</span></li>
+        <li>Vulnerability profiling <span class="stat planned"><i class="sw"></i>○</span></li>
+        <li>Predictive risk <span class="stat partial"><i class="sw"></i>◐</span></li>
+        <li>What-if analysis <span class="stat partial"><i class="sw"></i>◐</span></li>
+        <li>Crowd-aware evacuation <span class="stat planned"><i class="sw"></i>○</span></li>
+        <li>Context-aware response <span class="stat partial"><i class="sw"></i>◐</span></li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Privacy by Design</h3>
+      <ul class="plain" style="font-size:11.5px;">
+        <li>No facial recognition <span class="stat done"><i class="sw"></i>✓</span></li>
+        <li>Anonymous / ephemeral tracking <span class="stat done"><i class="sw"></i>✓</span></li>
+        <li>Aggregate zone analytics only <span class="stat done"><i class="sw"></i>✓</span></li>
+        <li>No persistent identity profiling <span class="stat done"><i class="sw"></i>✓</span></li>
+        <li>Alert audit trail <span class="stat done"><i class="sw"></i>✓</span></li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>Limitations</h3>
+      <ul class="plain" style="font-size:11.5px;">
+        <li>CCTV can't measure oxygen — asphyxia is a risk proxy, not a sensor reading</li>
+        <li>Structural load is an estimate, not engineering certification</li>
+        <li>Prototype dynamics signals need real-world validation</li>
+        <li>Demographic inference, if added, may carry bias — not implemented today</li>
+        <li>Decision support only — never a replacement for trained personnel</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:24px; align-items:flex-end; flex-wrap:wrap; margin-top:6px;">
+    <div class="quote-final">"We don't identify people. We identify crowd risk. CROWDLENS transforms multiple passive video sources into time-aware, spatially-aware, <b>predictive</b> crowd-safety intelligence — helping responders understand what is happening, what may happen next, and what action can be taken before the situation becomes critical."</div>
+    <div class="cite" style="max-width:30ch;">Vision statement. Built today: real detection, density, dynamics and risk scoring on uploaded video. Designed next: multi-camera fusion, prediction, evacuation.</div>
+  </div>
+</section>
+
+</main>
+
+<script>
+(function(){
+  const rail = document.getElementById('rail');
+  const slides = Array.from(document.querySelectorAll('section.slide'));
+  const buttons = slides.map((s,i)=>{
+    const b = document.createElement('button');
+    b.textContent = i+1;
+    b.title = s.dataset.n;
+    b.addEventListener('click', ()=> s.scrollIntoView({behavior:'smooth', block:'start'}));
+    rail.insertBefore(b, rail.querySelector('.nav-arrows'));
+    return b;
+  });
+  const counter = document.getElementById('slideCounter');
+  const bar = document.getElementById('progressBar');
+  let current = 0;
+  function setActive(i){
+    current = i;
+    buttons.forEach((b,j)=> b.classList.toggle('active', j===i));
+    counter.textContent = String(i+1).padStart(2,'0') + ' / ' + slides.length;
+    bar.style.width = ((i+1)/slides.length*100) + '%';
+  }
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting && e.intersectionRatio > 0.5){
+        setActive(slides.indexOf(e.target));
+      }
+    });
+  }, {threshold:[0.5]});
+  slides.forEach(s=> io.observe(s));
+  document.getElementById('prevBtn').addEventListener('click', ()=>{
+    const i = Math.max(0, current-1);
+    slides[i].scrollIntoView({behavior:'smooth', block:'start'});
+  });
+  document.getElementById('nextBtn').addEventListener('click', ()=>{
+    const i = Math.min(slides.length-1, current+1);
+    slides[i].scrollIntoView({behavior:'smooth', block:'start'});
+  });
+  window.addEventListener('keydown', (e)=>{
+    if(e.key==='ArrowDown' || e.key==='PageDown'){ e.preventDefault(); document.getElementById('nextBtn').click(); }
+    if(e.key==='ArrowUp' || e.key==='PageUp'){ e.preventDefault(); document.getElementById('prevBtn').click(); }
+  });
+  setActive(0);
+})();
+</script>

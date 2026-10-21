@@ -1,4 +1,5 @@
 import React from 'react'
+import { Video as VideoIcon } from 'lucide-react'
 import type { RiskLevel } from '../lib/types'
 import { LEVEL_HEX } from '../lib/types'
 
@@ -89,5 +90,35 @@ export function Dot({ ok, label }: { ok: boolean; label: string }) {
       <span className={`w-2 h-2 rounded-full ${ok ? 'bg-emerald-400 pulse-dot' : 'bg-red-400'}`} />
       {label}
     </span>
+  )
+}
+
+/** mm:ss (or h:mm:ss) from a real probed duration — never a guessed number. */
+export function formatDuration(sec: number | null | undefined): string {
+  if (sec == null || !isFinite(sec) || sec < 0) return '--:--'
+  const s = Math.round(sec)
+  const h = Math.floor(s / 3600)
+  const m = Math.floor((s % 3600) / 60)
+  const r = s % 60
+  const mm = h > 0 ? String(m).padStart(2, '0') : String(m)
+  return h > 0 ? `${h}:${mm}:${String(r).padStart(2, '0')}` : `${mm}:${String(r).padStart(2, '0')}`
+}
+
+export function formatDate(unixSec: number | null | undefined): string {
+  if (!unixSec) return '—'
+  return new Date(unixSec * 1000).toLocaleString(undefined, {
+    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+  })
+}
+
+/** Video thumbnail with a placeholder for videos that haven't been probed yet. */
+export function VideoThumb({ src, className = '' }: { src?: string | null; className?: string }) {
+  if (src) {
+    return <img src={src} alt="" className={`w-full h-full object-cover ${className}`} />
+  }
+  return (
+    <div className={`w-full h-full flex items-center justify-center bg-[var(--panel-2)] ${className}`}>
+      <VideoIcon size={28} className="text-[var(--muted)]" />
+    </div>
   )
 }

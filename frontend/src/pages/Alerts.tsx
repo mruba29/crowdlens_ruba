@@ -58,14 +58,17 @@ export default function Alerts() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <AlertTriangle size={16} className="text-red-400" />
-                    <span className="font-bold">HIGH CROWD RISK</span>
+                    <span className="font-bold">{a.alert_type ? a.alert_type.replace(/_/g, ' ') : 'HIGH CROWD RISK'}</span>
                     <RiskBadge level={a.level} />
                     <span className="text-xs px-1.5 py-0.5 rounded bg-[var(--panel-2)] border border-[var(--border)] text-[var(--muted)]">
                       {a.status}
                     </span>
                   </div>
                   <p className="text-sm mt-1.5">Zone: <span className="font-medium">{a.zone}</span> · Risk Score: <span className="tabular-nums">{Math.round(a.score)}</span></p>
-                  <p className="text-sm text-[var(--muted)] mt-1">Reason: {a.reason}</p>
+                  <p className="text-sm text-[var(--muted)] mt-1">Trigger signals: {a.reason}</p>
+                  {a.recommended_action && (
+                    <p className="text-sm mt-1"><span className="text-[var(--muted)]">Recommended action:</span> <span className="font-medium">{a.recommended_action}</span></p>
+                  )}
                   <p className="text-xs text-[var(--muted)] mt-1">
                     #{String(a.id).padStart(3, '0')} · {new Date(a.created_at * 1000).toLocaleTimeString()}
                     {a.acknowledged_at && <> · acknowledged {new Date(a.acknowledged_at * 1000).toLocaleTimeString()}</>}

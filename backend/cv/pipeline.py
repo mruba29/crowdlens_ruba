@@ -93,6 +93,8 @@ def analyze_video(path: str, *, zone_area_m2: float = 100.0, critical_ppm2: floa
                 "density_ppm2": dppm2,
                 "mean_motion": mv["mean_motion"],
                 "turbulence": mv["turbulence"],
+                "flow_direction_deg": mv.get("flow_direction_deg"),
+                "flow_direction_confidence": mv.get("flow_direction_confidence"),
                 "interpersonal_distance_m": ipd,
                 "score": r["score"],
                 "level": r["level"],

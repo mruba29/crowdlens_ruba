@@ -8,6 +8,9 @@ ml_service/venv/
 backend/*.db
 backend/*.sqlite3
 backend/uploads/
+*.env
+.env
+.env.*
 *.pt
 yolov8*.pt
 # node / build
